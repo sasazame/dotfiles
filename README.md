@@ -8,7 +8,7 @@ Personal configuration files and scripts for development environment setup.
 
 1. Clone this repository to your home directory:
 ```bash
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/.dotfiles
+git clone https://github.com/sasazame/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
