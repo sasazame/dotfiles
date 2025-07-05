@@ -23,28 +23,56 @@ HISTFILESIZE=200000
 
 # Function to deduplicate history entries
 _dedupe_history() {
-    local cmd="$(history 1 | sed 's/^[ ]*[0-9]*[ ]*//')"
+    # Get the raw history output and extract just the command
+    local hist_line="$(history 1)"
+    # Remove history number, then remove timestamp (YYYY-MM-DD HH:MM:SS format)
+    local cmd="$(echo "$hist_line" | sed 's/^[ ]*[0-9]*[ ]*//' | sed 's/^[0-9-]* [0-9:]* //')"
     
     # Skip commands that start with a space
     if [[ "$cmd" =~ ^[[:space:]] ]]; then
         return
     fi
     
-    local pwd_escaped="$(pwd | sed 's/[[\.*^$()+?{|]/\\&/g')"
+    local current_pwd="$(pwd)"
     local temp_file="/tmp/.bash_history_full.$$"
     
     if [ -f ~/.bash_history_full ]; then
-        # Remove lines with same directory and command
-        grep -v "^[0-9-]* [0-9:]* $pwd_escaped [0-9]* $cmd$" ~/.bash_history_full > "$temp_file" 2>/dev/null || true
-        mv "$temp_file" ~/.bash_history_full
+        # Create a pattern that matches lines with the same directory and command
+        # The format is: DATE TIME DIRECTORY HIST_NUM HIST_DATE HIST_TIME COMMAND
+        # We want to match based on DIRECTORY and COMMAND being the same
+        awk -v dir="$current_pwd" -v cmd="$cmd" '
+        {
+            # Extract the directory (field 3)
+            directory = $3
+            
+            # Extract command (everything after field 6)
+            command = ""
+            for (i=7; i<=NF; i++) {
+                if (command != "") command = command " "
+                command = command $i
+            }
+            
+            # Print line only if directory or command differs
+            if (directory != dir || command != cmd) {
+                print $0
+            }
+        }' ~/.bash_history_full > "$temp_file" 2>/dev/null || true
+        
+        # Only update if there were changes
+        if ! cmp -s "$temp_file" ~/.bash_history_full; then
+            mv "$temp_file" ~/.bash_history_full
+        else
+            rm -f "$temp_file"
+        fi
     fi
     
-    # Add the new entry
-    echo "$(date "+%Y-%m-%d %H:%M:%S") $(pwd) $(history 1)" >> ~/.bash_history_full
+    # Add the new entry (use the full history line which includes the timestamp)
+    echo "$(date "+%Y-%m-%d %H:%M:%S") $(pwd) $hist_line" >> ~/.bash_history_full
 }
 
 # Real-time history sharing across sessions with directory logging and deduplication
-export PROMPT_COMMAND='history -a; history -c; history -r; if [ "$(id -u)" -ne 0 ]; then _dedupe_history; fi; '"${PROMPT_COMMAND}"
+# Note: history -a; history -c; history -r bypasses erasedups, so we use a different approach
+export PROMPT_COMMAND='history -a; if [ "$(id -u)" -ne 0 ]; then _dedupe_history; fi; '"${PROMPT_COMMAND}"
 
 # Save multi-line commands as one command
 shopt -s cmdhist
