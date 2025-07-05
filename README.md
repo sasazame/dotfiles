@@ -29,6 +29,20 @@ ln -sf ~/.dotfiles/.vimrc ~/.vimrc
 # Add more as needed
 ```
 
+### Git Configuration
+
+The git configuration is split into two files:
+- `.gitconfig` - Shared settings (tracked in this repository)
+- `.gitconfig.local` - Personal settings like name and email (not tracked)
+
+After installation, configure your personal git settings:
+```bash
+git config --file ~/.gitconfig.local user.name "Your Name"
+git config --file ~/.gitconfig.local user.email "your.email@example.com"
+```
+
+See `.gitconfig.local.example` for more examples.
+
 ## Structure
 
 - `.config/` - Application-specific configurations

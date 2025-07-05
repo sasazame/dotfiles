@@ -89,6 +89,19 @@ main() {
         create_symlink "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
     fi
     
+    # Setup git local configuration
+    if [ ! -f "$HOME/.gitconfig.local" ]; then
+        if [ -f "$DOTFILES_DIR/.gitconfig.local.example" ]; then
+            cp "$DOTFILES_DIR/.gitconfig.local.example" "$HOME/.gitconfig.local"
+            print_info "Created ~/.gitconfig.local from template"
+            print_warning "Please update ~/.gitconfig.local with your personal information:"
+            print_warning "  git config --file ~/.gitconfig.local user.name \"Your Name\""
+            print_warning "  git config --file ~/.gitconfig.local user.email \"your.email@example.com\""
+        fi
+    else
+        print_info "~/.gitconfig.local already exists, skipping"
+    fi
+    
     # Create .config directory if it doesn't exist
     mkdir -p "$HOME/.config"
     

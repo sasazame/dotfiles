@@ -1,0 +1,22 @@
+# Git local configuration example
+# Copy this file to ~/.gitconfig.local and update with your information
+
+[user]
+    name = Your Name
+    email = your.email@example.com
+
+# Example: Work-specific configuration
+# [includeIf "gitdir:~/work/"]
+#     path = ~/.gitconfig.work
+
+# Example: Personal signing key
+# [user]
+#     signingkey = YOUR_GPG_KEY_ID
+
+# Example: GitHub specific settings
+# [github]
+#     user = your-github-username
+
+# Example: Different email for specific repositories
+# [includeIf "gitdir:~/projects/opensource/"]
+#     path = ~/.gitconfig.opensource
