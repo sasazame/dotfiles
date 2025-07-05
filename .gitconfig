@@ -40,6 +40,9 @@
 [push]
     default = simple
 
+[init]
+    defaultBranch = main
+
 [pull]
     rebase = false
 
@@ -48,3 +51,64 @@
 
 [diff]
     tool = vimdiff
+[credential "https://github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/usr/bin/gh auth git-credential
+
+[fetch]
+    prune = true
+    pruneTag = true
+
+[rebase]
+    autoStash = true
+    autoSquash = true
+
+[commit]
+    verbose = true
+
+[log]
+    follow = true
+
+[rerere]
+    enabled = true
+    autoUpdate = true
+
+[help]
+    autoCorrect = prompt
+
+[branch]
+    sort = -committerdate
+
+[column]
+    ui = auto
+
+[status]
+    showUntrackedFiles = all
+    short = true
+    branch = true
+
+[interactive]
+    diffFilter = delta --color-only
+
+[pager]
+    diff = delta
+    log = delta
+    reflog = delta
+    show = delta
+
+[delta]
+    navigate = true
+    light = false
+    side-by-side = true
+    line-numbers = true
+    line-numbers-left-format = "{nm:>4}┊"
+    line-numbers-right-format = "{np:>4}│"
+    line-numbers-zero-style = dim syntax
+    file-style = bold yellow ul
+    file-decoration-style = none
+    commit-decoration-style = bold yellow box ul
+    hunk-header-decoration-style = cyan box ul
+    whitespace-error-style = 22 reverse
