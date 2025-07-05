@@ -40,6 +40,7 @@ ln -sf ~/.dotfiles/.vimrc ~/.vimrc
 ## Features
 
 - Shell configuration with useful aliases and functions
+- Enhanced bash history with directory tracking and real-time sharing
 - Git configuration with helpful aliases
 - Vim configuration for development
 - Utility scripts for common tasks
@@ -58,6 +59,20 @@ Example:
 ```bash
 ./scripts/kill-port.sh 3000
 ```
+
+## Bash Customizations
+
+The `.bashrc` includes numerous enhancements:
+
+- **Enhanced history** with directory tracking and real-time sharing
+- **Useful aliases** for common commands
+- **Smart PATH configuration** for development tools
+- **Color support** for better readability
+
+See [docs/bashrc-customizations-overview.md](docs/bashrc-customizations-overview.md) for a complete overview.
+
+For specific features:
+- [Bash History Guide](docs/bash-history-guide.md) - Advanced history features
 
 ## Customization
 
