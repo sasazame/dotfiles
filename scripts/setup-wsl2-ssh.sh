@@ -78,7 +78,58 @@ echo "Current port forwarding rules:"
 powershell.exe -Command "netsh interface portproxy show v4tov4" | grep -E "$LISTEN_PORT|Listen" || echo "No rules configured"
 
 # Get Windows host IP for reference
-WINDOWS_HOST_IP=$(powershell.exe -Command "(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {\$_.InterfaceAlias -notlike '*WSL*' -and \$_.IPAddress -notlike '127.*'} | Select-Object -First 1).IPAddress" | tr -d '\r\n')
+# Try multiple methods to get the correct IP
+WINDOWS_HOST_IP=""
+
+# Method 1: Try to get IP from active network adapters
+WINDOWS_HOST_IP=$(powershell.exe -Command "
+    \$adapters = Get-NetAdapter | Where-Object {
+        \$_.Status -eq 'Up' -and 
+        \$_.Name -notlike '*WSL*' -and 
+        \$_.Name -notlike '*Loopback*'
+    }
+    foreach (\$adapter in \$adapters) {
+        \$ip = Get-NetIPAddress -InterfaceIndex \$adapter.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue | 
+               Where-Object { \$_.IPAddress -notlike '127.*' -and \$_.IPAddress -notlike '169.254.*' }
+        if (\$ip) {
+            Write-Output \$ip.IPAddress
+            break
+        }
+    }
+" 2>/dev/null | tr -d '\r\n' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | head -n1)
+
+# Method 2: If method 1 fails, try parsing ipconfig
+if [ -z "$WINDOWS_HOST_IP" ]; then
+    WINDOWS_HOST_IP=$(powershell.exe -Command "ipconfig" 2>/dev/null | grep -A4 "Ethernet\|Wi-Fi\|Wireless" | grep -E "IPv4.*: [0-9]" | grep -oE '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -v '^127\.' | grep -v '^169\.254\.' | head -n1)
+fi
+
+# Method 3: If still no IP, get the default gateway's interface IP
+if [ -z "$WINDOWS_HOST_IP" ]; then
+    WINDOWS_HOST_IP=$(powershell.exe -Command "
+        \$gateway = Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Sort-Object -Property InterfaceMetric | Select-Object -First 1
+        if (\$gateway) {
+            \$ip = Get-NetIPAddress -InterfaceIndex \$gateway.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue | 
+                   Where-Object { \$_.IPAddress -notlike '127.*' -and \$_.IPAddress -notlike '169.254.*' }
+            if (\$ip) { Write-Output \$ip.IPAddress }
+        }
+    " 2>/dev/null | tr -d '\r\n' | grep -E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$' | head -n1)
+fi
+
+# Display connection information
 echo ""
-echo "To connect via SSH from another machine:"
-echo "  ssh -p $LISTEN_PORT $USER@$WINDOWS_HOST_IP"
+if [ -n "$WINDOWS_HOST_IP" ]; then
+    echo "To connect via SSH from another machine:"
+    echo "  ssh -p $LISTEN_PORT $USER@$WINDOWS_HOST_IP"
+else
+    echo "Could not automatically determine Windows host IP address."
+    echo ""
+    echo "To find your Windows IP address manually:"
+    echo "  1. Open Command Prompt or PowerShell on Windows"
+    echo "  2. Run: ipconfig"
+    echo "  3. Look for your active network adapter (Ethernet or Wi-Fi)"
+    echo "  4. Use the IPv4 Address shown there"
+    echo ""
+    echo "Then connect with:"
+    echo "  ssh -p $LISTEN_PORT $USER@<YOUR_WINDOWS_IP>"
+fi
+
