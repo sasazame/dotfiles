@@ -92,8 +92,21 @@ main() {
             exit 1
         fi
         
+        # Check if .gitconfig.local exists
+        GITCONFIG_LOCAL="$HOME/.gitconfig.local"
+        
         echo_info "Configuring Git..."
-        git config --global user.signingkey "$KEY_ID"
+        
+        # Configure in .gitconfig.local
+        if [[ -f "$GITCONFIG_LOCAL" ]]; then
+            echo_info "Updating $GITCONFIG_LOCAL..."
+            git config --file "$GITCONFIG_LOCAL" user.signingkey "$KEY_ID"
+        else
+            echo_info "Creating $GITCONFIG_LOCAL..."
+            git config --file "$GITCONFIG_LOCAL" user.signingkey "$KEY_ID"
+        fi
+        
+        # Set commit signing settings in global config
         git config --global commit.gpgsign true
         git config --global gpg.program "$(command -v gpg)"
         
@@ -102,9 +115,11 @@ main() {
         # Show current Git config
         echo ""
         echo "Current Git configuration:"
-        echo "Name: $(git config --global user.name)"
-        echo "Email: $(git config --global user.email)"
-        echo "Signing key: $(git config --global user.signingkey)"
+        if [[ -f "$GITCONFIG_LOCAL" ]]; then
+            echo "Name: $(git config --file "$GITCONFIG_LOCAL" user.name || echo 'Not set in .gitconfig.local')"
+            echo "Email: $(git config --file "$GITCONFIG_LOCAL" user.email || echo 'Not set in .gitconfig.local')"
+            echo "Signing key: $(git config --file "$GITCONFIG_LOCAL" user.signingkey)"
+        fi
         echo "Auto-sign commits: $(git config --global commit.gpgsign)"
     fi
     
