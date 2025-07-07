@@ -124,6 +124,76 @@ main() {
     print_info "Installation completed!"
     print_info "Backup of existing files saved to: $BACKUP_DIR"
     print_warning "Please restart your shell or run 'source ~/.bashrc' to apply changes"
+    
+    # Suggest next actions
+    echo ""
+    print_info "Suggested next actions:"
+    echo ""
+    
+    # Check if git signing is set up
+    if [ ! -f "$HOME/.gitconfig.local" ] || ! git config --file "$HOME/.gitconfig.local" user.signingkey >/dev/null 2>&1; then
+        echo "  1. Set up Git commit signing (recommended for GitHub):"
+        echo -e "     ${GREEN}./scripts/setup-git-signing.sh${NC}"
+        echo ""
+    fi
+    
+    # Check if SSH keys exist
+    if [ ! -f "$HOME/.ssh/id_rsa" ] && [ ! -f "$HOME/.ssh/id_ed25519" ]; then
+        echo "  2. Generate SSH keys for Git authentication:"
+        echo -e "     ${GREEN}ssh-keygen -t ed25519 -C \"your-email@example.com\"${NC}"
+        echo ""
+    fi
+    
+    # Check if running on WSL
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        echo "  3. Set up SSH access to WSL2 from LAN devices:"
+        echo -e "     ${GREEN}./scripts/setup-wsl2-ssh.sh${NC}"
+        echo ""
+    fi
+    
+    # Check if GPG is installed but not configured
+    if command -v gpg >/dev/null 2>&1 && ! gpg --list-secret-keys 2>/dev/null | grep -q "sec"; then
+        echo "  4. Import existing GPG keys:"
+        echo -e "     ${GREEN}./scripts/gpg-import.sh${NC}"
+        echo ""
+    fi
+    
+    # General maintenance scripts
+    echo "  5. Available utility scripts:"
+    if [ -d "$DOTFILES_DIR/scripts" ]; then
+        for script in "$DOTFILES_DIR/scripts"/*.sh; do
+            if [ -f "$script" ] && [ -x "$script" ]; then
+                script_name=$(basename "$script")
+                case "$script_name" in
+                    "setup-git-signing.sh")
+                        [ -f "$HOME/.gitconfig.local" ] && git config --file "$HOME/.gitconfig.local" user.signingkey >/dev/null 2>&1 && continue
+                        echo -e "     - ${GREEN}$script_name${NC}: Set up Git commit signing"
+                        ;;
+                    "gpg-export.sh")
+                        echo -e "     - ${GREEN}$script_name${NC}: Export GPG keys for backup"
+                        ;;
+                    "gpg-import.sh")
+                        echo -e "     - ${GREEN}$script_name${NC}: Import GPG keys from backup"
+                        ;;
+                    "setup-wsl2-ssh.sh")
+                        grep -qi microsoft /proc/version 2>/dev/null || continue
+                        echo -e "     - ${GREEN}$script_name${NC}: Configure SSH access to WSL2"
+                        ;;
+                    "setup-wsl2-ssh-elevated.ps1")
+                        # Skip PowerShell scripts in this list
+                        continue
+                        ;;
+                    *)
+                        # Show other scripts without description
+                        echo -e "     - ${GREEN}$script_name${NC}"
+                        ;;
+                esac
+            fi
+        done
+    fi
+    
+    echo ""
+    print_info "For more information about any script, run it with --help"
 }
 
 # Run main function

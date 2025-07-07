@@ -113,9 +113,5 @@
     commit-decoration-style = bold yellow box ul
     hunk-header-decoration-style = cyan box ul
     whitespace-error-style = 22 reverse
-[user]
-	name = sasazame
-	email = sasazame@zametech.com
-	signingkey = A177DE22089CB991
 [gpg]
 	program = /usr/bin/gpg
