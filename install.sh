@@ -89,6 +89,11 @@ main() {
         create_symlink "$DOTFILES_DIR/.vimrc" "$HOME/.vimrc"
     fi
     
+    # Install tmux configuration
+    if [ -f "$DOTFILES_DIR/.tmux.conf" ]; then
+        create_symlink "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
+    fi
+    
     # Setup git local configuration
     if [ ! -f "$HOME/.gitconfig.local" ]; then
         if [ -f "$DOTFILES_DIR/.gitconfig.local.example" ]; then
