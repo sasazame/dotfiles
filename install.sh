@@ -125,6 +125,12 @@ main() {
         chmod +x "$DOTFILES_DIR/scripts"/*.sh 2>/dev/null || true
         print_info "Made scripts executable"
     fi
+
+    # Link select utility scripts into ~/.local/bin for easy access
+    mkdir -p "$HOME/.local/bin"
+    if [ -f "$DOTFILES_DIR/scripts/gh-pr-review-summary.sh" ]; then
+        create_symlink "$DOTFILES_DIR/scripts/gh-pr-review-summary.sh" "$HOME/.local/bin/gh-pr-review"
+    fi
     
     print_info "Installation completed!"
     print_info "Backup of existing files saved to: $BACKUP_DIR"
