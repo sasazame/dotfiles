@@ -1,4 +1,18 @@
 [tools]
-node = "latest"
+node = "lts"
 rust = "stable"
 jq = "latest"
+bat = "latest"
+fd = "latest"
+ripgrep = "latest"
+eza = "latest"
+fzf = "latest"
+sd = "latest"
+bun = "latest"
+fastfetch = "latest"
+starship = "latest"
+"npm:@openai/codex" = "latest"
+"npm:@anthropic-ai/claude-code" = "latest"
+
+[settings]
+auto_install = true

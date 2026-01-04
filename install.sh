@@ -74,6 +74,11 @@ main() {
     if [ -f "$DOTFILES_DIR/.bashrc" ]; then
         create_symlink "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
     fi
+
+    # Install zsh configuration
+    if [ -f "$DOTFILES_DIR/.zshrc" ]; then
+        create_symlink "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
+    fi
     
     # Install git configuration
     if [ -f "$DOTFILES_DIR/.gitconfig" ]; then

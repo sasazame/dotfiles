@@ -33,13 +33,31 @@ ln -sf ~/.dotfiles/.vimrc ~/.vimrc
 
 This repo uses `mise` for global development tools. The global config lives in `config/mise/config.toml` and is symlinked to `~/.config/mise/config.toml` by `install.sh`. The install script does not run `mise install` or upgrade tools.
 
+Prerequisites (apt):
+
+```bash
+sudo apt update
+sudo apt install -y git gh zsh
+```
+
 Initial setup flow:
 
-1. Install `git` and `gh` with apt
-2. Run `gh auth login`
-3. Clone this repo
-4. Run `./install.sh` to create symlinks
-5. Run `mise install` explicitly
+```bash
+gh auth login
+
+git clone https://github.com/sasazame/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+
+./install.sh
+
+mise install
+```
+
+Optional: set zsh as the default shell if needed.
+
+```bash
+chsh -s "$(command -v zsh)"
+```
 
 ### Git Configuration
 
