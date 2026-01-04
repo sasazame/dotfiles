@@ -199,3 +199,22 @@ export PATH=~/.npm-global/bin:$PATH
 
 export PATH=$HOME/.cargo/bin:$PATH
 . "$HOME/.cargo/env"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Git new branch with auto-reset
+gnb() {
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)
+    
+    # Create new branch
+    git checkout -b "$1"
+    
+    # If we were on main or develop, reset it to origin
+    if [[ "$current_branch" == "main" ]] || [[ "$current_branch" == "develop" ]]; then
+        git branch -f "$current_branch" "origin/$current_branch"
+        echo "✅ Created branch $1 and reset $current_branch to origin/$current_branch"
+    fi
+}
+eval "$(~/.local/bin/mise activate bash)"
