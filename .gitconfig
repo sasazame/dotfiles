@@ -36,7 +36,16 @@
     
     # Branch management
     cleanup = "!git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
-	nb = "\\!f() { \n    CURRENT=$(git rev-parse --abbrev-ref HEAD);\n    if [ \"$CURRENT\" = \"main\" ] || [ \"$CURRENT\" = \"develop\" ]; then\n        git checkout -b \"$1\" && \n        git branch -f \"$CURRENT\" \"origin/$CURRENT\" &&\n        echo \"✅ Created branch $1 and reset $CURRENT to origin/$CURRENT\";\n    else\n        git checkout -b \"$1\";\n    fi\n}; f"
+    nb = "!f() { \
+        CURRENT=$(git rev-parse --abbrev-ref HEAD); \
+        if [ \"$CURRENT\" = \"main\" ] || [ \"$CURRENT\" = \"develop\" ]; then \
+            git checkout -b \"$1\" && \
+            git branch -f \"$CURRENT\" \"origin/$CURRENT\" && \
+            echo \"✅ Created branch $1 and reset $CURRENT to origin/$CURRENT\"; \
+        else \
+            git checkout -b \"$1\"; \
+        fi \
+    }; f"
 
 [push]
     default = simple
