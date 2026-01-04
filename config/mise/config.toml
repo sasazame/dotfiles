@@ -1,0 +1,4 @@
+[tools]
+node = "latest"
+rust = "stable"
+jq = "latest"
