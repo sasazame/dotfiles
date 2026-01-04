@@ -54,7 +54,6 @@ alias l='ls -CF'
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.npm-global/bin:$PATH"
 
-export PATH="$HOME/.cargo/bin:$PATH"
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 # Git new branch with auto-reset
@@ -67,8 +66,24 @@ gnb() {
 
     # If we were on main or develop, reset it to origin
     if [[ "$current_branch" == "main" ]] || [[ "$current_branch" == "develop" ]]; then
-        git branch -f "$current_branch" "origin/$current_branch"
-        echo "✅ Created branch $1 and reset $current_branch to origin/$current_branch"
+        if git rev-parse --verify "origin/$current_branch" >/dev/null 2>&1; then
+            local behind_ahead
+            local behind_count
+            local ahead_count
+            behind_ahead=$(git rev-list --left-right --count "origin/$current_branch...$current_branch" 2>/dev/null || echo "0 0")
+            behind_count=${behind_ahead%% *}
+            ahead_count=${behind_ahead##* }
+
+            if [ "$ahead_count" -gt 0 ]; then
+                echo "⚠️  $current_branch has $ahead_count local commit(s) not on origin/$current_branch."
+                echo "    Skipping reset to avoid losing local commits."
+            else
+                git branch -f "$current_branch" "origin/$current_branch"
+                echo "✅ Created branch $1 and reset $current_branch to origin/$current_branch"
+            fi
+        else
+            echo "⚠️  origin/$current_branch not found; skipping reset."
+        fi
     fi
 }
 
