@@ -74,6 +74,11 @@ main() {
     if [ -f "$DOTFILES_DIR/.bashrc" ]; then
         create_symlink "$DOTFILES_DIR/.bashrc" "$HOME/.bashrc"
     fi
+
+    # Install zsh configuration
+    if [ -f "$DOTFILES_DIR/.zshrc" ]; then
+        create_symlink "$DOTFILES_DIR/.zshrc" "$HOME/.zshrc"
+    fi
     
     # Install git configuration
     if [ -f "$DOTFILES_DIR/.gitconfig" ]; then
@@ -109,6 +114,12 @@ main() {
     
     # Create .config directory if it doesn't exist
     mkdir -p "$HOME/.config"
+
+    # Link mise global config
+    if [ -f "$DOTFILES_DIR/config/mise/config.toml" ]; then
+        mkdir -p "$HOME/.config/mise"
+        create_symlink "$DOTFILES_DIR/config/mise/config.toml" "$HOME/.config/mise/config.toml"
+    fi
     
     # Link .config subdirectories
     if [ -d "$DOTFILES_DIR/.config" ]; then
