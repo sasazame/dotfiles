@@ -29,6 +29,65 @@ print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+# Check if a command exists
+has_command() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check required tools before running installation
+check_prerequisites() {
+    local missing=()
+    local apt_missing=()
+    local tool
+
+    for tool in git gh zsh mise; do
+        if ! has_command "$tool"; then
+            missing+=("$tool")
+            case "$tool" in
+                git|gh|zsh)
+                    apt_missing+=("$tool")
+                    ;;
+            esac
+        fi
+    done
+
+    if [ "${#missing[@]}" -eq 0 ]; then
+        return 0
+    fi
+
+    print_warning "Missing required tools: ${missing[*]}"
+    echo ""
+    print_info "Install suggestions:"
+
+    if [ "${#apt_missing[@]}" -gt 0 ]; then
+        echo "  sudo apt update"
+        echo "  sudo apt install -y ${apt_missing[*]}"
+    fi
+
+    if ! has_command mise; then
+        echo "  curl https://mise.run | sh"
+        echo "  ~/.local/bin/mise --version"
+    fi
+
+    echo ""
+
+    if [ ! -t 0 ]; then
+        print_error "No interactive input available; aborting."
+        exit 1
+    fi
+
+    read -r -p "Continue anyway? [y/N] " response
+    case "$response" in
+        y|Y|yes|YES)
+            print_warning "Continuing without required tools."
+            ;;
+        *)
+            print_error "Aborted."
+            exit 1
+            ;;
+    esac
+}
+
 # Create backup directory
 create_backup_dir() {
     if [ ! -d "$BACKUP_DIR" ]; then
@@ -67,6 +126,9 @@ create_symlink() {
 main() {
     print_info "Starting dotfiles installation..."
     
+    # Check tool prerequisites early
+    check_prerequisites
+
     # Create backup directory
     create_backup_dir
     
